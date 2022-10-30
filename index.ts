@@ -27,25 +27,6 @@ const port = process.env.PORT || 3000;
 app.use(express.json({ limit: "50mb" }));
 app.use(cors());
 
-app.get("/user/:id", async (req, res) => {
-  const user = await User.findByPk(req.params.id);
-  const auth = await Auth.findByPk(req.params.id);
-  res.json({ user, auth });
-});
-
-app.post("/user/me", async (req, res) => {
-  if (req.body.email) {
-    const userFinded = await searchUser(req.body.email);
-    if (userFinded) {
-      res.json(userFinded);
-    } else {
-      res.status(404).json({ error: "user not found" });
-    }
-  } else {
-    res.status(404).json({ error: "Invalid params" });
-  }
-});
-
 app.post("/user/recover", async (req, res) => {
   let numRamdom = Math.floor(Math.random() * 999999);
   console.log(req.body.email);
@@ -140,8 +121,9 @@ app.post("/user/pets", async (req, res) => {
   }
 });
 app.delete("/user/pets", async (req, res) => {
-  deletedPet(req.body.id);
-  res.status(200).json({ deleted: true });
+  const token = req.headers.authorization;
+  const petDeleted = await deletedPet(req.body.id, token);
+  res.json({ petDeleted });
 });
 
 app.post("/arroundPet", async (req, res) => {

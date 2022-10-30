@@ -137,15 +137,21 @@ export async function returFilterPets(filter) {
     return filterPets;
   }
 }
-export async function deletedPet(id) {
-  let petDelete = await Pet.destroy({
-    where: {
-      id,
-    },
-  });
-  const objectID = id;
-  index.deleteObject(objectID).then((e) => {});
-  return petDelete;
+export async function deletedPet(id, token) {
+  const verify = authMiddleWare(token);
+
+  if (verify) {
+    let petDelete = await Pet.destroy({
+      where: {
+        id,
+      },
+    });
+    const objectID = id;
+    index.deleteObject(objectID).then((e) => {});
+    return { destroy: true };
+  } else {
+    return { destroy: false };
+  }
 }
 
 export async function returnPerfil(id) {
